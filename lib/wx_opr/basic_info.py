@@ -9,24 +9,25 @@ class BasicInfo():
     def __init__(self):
         self.db = MongoConn().db
 
-    def userLogin(self, username,password):
+    def user_login(self, username,password):
         user_info = self.db['user_open'].find_one({'_id': username})
         if user_info and user_info['password']==password:
             return True
         else:
             return False
 
-    def add_user(self, **kwargs):
+    def create_interface(self, **kwargs):
         try:
-            self.db['open_users'].insert_one(kwargs)
-            kwargs['order_list'] = []
-            self.db['consumer_info'].insert_one(kwargs)
+            self.db['interface_template'].insert_one(kwargs)
             return True
         except Exception:
             return traceback.format_exc()
 
-    def find_user(self, user_id):
-        result = self.db['open_users'].find_one(user_id)
+    def fetch_interface(self):
+        templates = self.db['interface_template'].find({})
+        result = []
+        for template in templates:
+            result.append(template)
         return result
 
     def get_dishInfo(self, store_id):

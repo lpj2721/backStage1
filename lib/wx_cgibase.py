@@ -122,17 +122,17 @@ class cgibase:
         if (sid == '' or sid is None):
             self.out = conf.err["relogin"]
             return False  # cookie error
-        r = g_session_redis.get(conf.g_redis_pix + sid)
+        r = g_session_redis.get(sid)
         if r is None or r == "":
             self.out = conf.err["relogin"]
             return False  # cookie error
         self.name = r
-        check_sid = g_session_redis.get(r)
-        if conf.g_redis_pix + sid == check_sid:
-            g_session_redis.expire(conf.g_redis_pix + sid, conf.g_ssid_timeout)
+        check_sid = g_session_redis.get(r).decode()
+        if sid == check_sid:
+            g_session_redis.expire(sid, conf.g_ssid_timeout)
             return True
         else:
-            g_session_redis.delete(conf.g_redis_pix + sid)
+            g_session_redis.delete(sid)
             self.out = conf.err["relogin"]
             return False
 

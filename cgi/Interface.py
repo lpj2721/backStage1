@@ -10,15 +10,16 @@ from wx_cgibase import cgibase
 from wx_opr.basic_info import BasicInfo
 
 
-class Login(cgibase):
+class Interfaces(cgibase):
     def __init__(self):
         self.oprList = {
-            "login": self.login
+            "fetch": self.fetch,
+            "create": self.create,
         }
         return cgibase.__init__(self)
 
     def onInit(self):
-        cgibase.SetNoCheckCookie(self)
+        # cgibase.SetNoCheckCookie(self)
         opr = cgibase.onInit(self)
         if opr is None:
             return
@@ -26,19 +27,29 @@ class Login(cgibase):
             return
         self.oprList[opr]()
 
-    def login(self):
+    def fetch(self):
+
+        '''{"opr":"login","data":{"username":"admin","password":"123456"}}'''
+        self.log.debug("fetch in.")
+        data = self.input["input"]["data"]
+        print(data)
+        if data:
+            data = BasicInfo().fetch_interface()
+            res = {"success": True, "data": data}
+            self.out = json.dumps(res)
+        else:
+            res = {"success":False,"message":"Ok！"}
+            self.out = json.dumps(res)
+        return self.out
+
+    def create(self):
 
         '''{"opr":"login","data":{"username":"admin","password":"123456"}}'''
         self.log.debug("join in.")
         data = self.input["input"]["data"]
-        user_name = data['username']
-        result = BasicInfo().user_login(username=data['username'], password=data['password'])
-        if result:
-            self.token = randomStr()
-            g_session_redis.set(g_redis_pix + self.token, user_name)
-            g_session_redis.set(user_name, g_redis_pix + self.token)
-            g_session_redis.set('token',g_redis_pix + self.token)
-            g_session_redis.expire(g_redis_pix + self.token, g_ssid_timeout)
+        print(data)
+        if data:
+            BasicInfo().create_interface(**data)
             res = {"success": True, "message": "Ok！"}
             self.out = json.dumps(res)
         else:
@@ -46,6 +57,6 @@ class Login(cgibase):
             self.out = json.dumps(res)
         return self.out
 
+
 if __name__ == "__main__":
-    login = Login()
-    login.onInit()
+    pass

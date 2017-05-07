@@ -6,7 +6,7 @@ import json
 import conf
 from db_conn.cont_redis import g_session_redis
 from login import Login
-from users import Users
+from Interface import Interfaces
 
 app = Flask(__name__)
 app.debug = conf.debug_mode
@@ -15,15 +15,16 @@ app.debug = conf.debug_mode
 def pre_do(c, fun, ext_type=None):
     req_dict = {}
     sid = request.headers.get('access-token')
+    print(request.method)
+    print(type(request.method))
     if ext_type is not "login":
         if sid == '':
-            print(33)
+            print(331)
             out = {"message": "会话超时！"}
             resp = make_response(json.dumps(out), 401)
             return resp
-    if request.method == "GET":
-        req_dict["input"] = request.values
-    elif request.method == "POST":
+    if request.method == "POST":
+        print(1233)
         if ext_type=="file_up":
             req_dict["input"] = {"opr": "upload"}
         elif ext_type=="ext_type":
@@ -63,6 +64,7 @@ def pre_do(c, fun, ext_type=None):
     token = g_session_redis.get('token')
     resp = make_response(out)
     resp.headers['access-token'] = token
+    resp.headers['x-total-count'] = 1
     return resp
 
 
@@ -71,9 +73,9 @@ def login_func():
     return pre_do(Login(),"login",ext_type="login")
 
 
-@app.route(conf.url_pre + "users", methods = ['GET', 'POST', 'PATCH'])
-def users_func():
-    return pre_do(Users(),"Users")
+@app.route(conf.url_pre + "interface", methods = ['GET', 'POST', 'PATCH'])
+def interface_func():
+    return pre_do(Interfaces(),"Interfaces")
 
 
 if __name__ == '__main__':
