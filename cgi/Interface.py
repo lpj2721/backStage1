@@ -15,6 +15,8 @@ class Interfaces(cgibase):
         self.oprList = {
             "fetch": self.fetch,
             "create": self.create,
+            "modify": self.modify,
+            "remove": self.remove,
         }
         return cgibase.__init__(self)
 
@@ -32,10 +34,9 @@ class Interfaces(cgibase):
         '''{"opr":"login","data":{"username":"admin","password":"123456"}}'''
         self.log.debug("fetch in.")
         data = self.input["input"]["data"]
-        print(data)
         if data:
-            data = BasicInfo().fetch_interface()
-            res = {"success": True, "data": data}
+            result = BasicInfo().fetch_interface()
+            res = {"success": True, "data": result}
             self.out = json.dumps(res)
         else:
             res = {"success":False,"message":"Ok！"}
@@ -47,13 +48,43 @@ class Interfaces(cgibase):
         '''{"opr":"login","data":{"username":"admin","password":"123456"}}'''
         self.log.debug("join in.")
         data = self.input["input"]["data"]
-        print(data)
         if data:
             BasicInfo().create_interface(**data)
             res = {"success": True, "message": "Ok！"}
             self.out = json.dumps(res)
         else:
             res = {"success":False,"message":"Ok！"}
+            self.out = json.dumps(res)
+        return self.out
+
+    def modify(self):
+
+        '''{"opr":"login","data":{"username":"admin","password":"123456"}}'''
+        self.log.debug("modify in.")
+        data = self.input["input"]["data"].get('data')
+        if data:
+            result = BasicInfo().modify_interface(**data)
+            if result:
+                res = {"success": True, "message": "Ok！"}
+                self.out = json.dumps(res)
+            else:
+                res = {"success":False,"message":"更新失败！"}
+                self.out = json.dumps(res)
+        else:
+            res = {"success": False, "message": "输入有误！"}
+            self.out = json.dumps(res)
+        return self.out
+
+    def remove(self):
+        self.log.debug("remove in.")
+        data = self.input['input']['data'].get('id')
+        print(data)
+        if data:
+            BasicInfo().remove_interface(data)
+            res = {"success": True, "message": "Ok！"}
+            self.out = json.dumps(res)
+        else:
+            res = {"success": False, "message": "输入有误！"}
             self.out = json.dumps(res)
         return self.out
 

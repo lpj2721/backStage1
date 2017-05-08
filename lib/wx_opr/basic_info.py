@@ -30,6 +30,19 @@ class BasicInfo():
             result.append(template)
         return result
 
+    def modify_interface(self,**kwargs):
+        _id = kwargs.get('_id')
+        del kwargs['_id']
+        print(kwargs)
+        if _id:
+            self.db['interface_template'].update_one({'_id': _id},{"$set": kwargs})
+            return True
+        else:
+            return False
+
+    def remove_interface(self,_id):
+        self.db['interface_template'].delete_one({'_id':_id})
+
     def get_dishInfo(self, store_id):
         dishInfo = self.db['business_info'].find_one(store_id, {'_id': 0, 'dishes': 1, 'dish': 1})
         dish_type = sorted(dishInfo['dishes'], key=lambda type_sn: type_sn['type_sn'])

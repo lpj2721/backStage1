@@ -15,16 +15,12 @@ app.debug = conf.debug_mode
 def pre_do(c, fun, ext_type=None):
     req_dict = {}
     sid = request.headers.get('access-token')
-    print(request.method)
-    print(type(request.method))
     if ext_type is not "login":
         if sid == '':
-            print(331)
             out = {"message": "会话超时！"}
             resp = make_response(json.dumps(out), 401)
             return resp
     if request.method == "POST":
-        print(1233)
         if ext_type=="file_up":
             req_dict["input"] = {"opr": "upload"}
         elif ext_type=="ext_type":
