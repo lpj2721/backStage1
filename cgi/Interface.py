@@ -34,9 +34,11 @@ class Interfaces(cgibase):
         '''{"opr":"login","data":{"username":"admin","password":"123456"}}'''
         self.log.debug("fetch in.")
         data = self.input["input"]["data"]
+        page = int(data['page'])
+        page_size = data['PAGE_SIZE']
         if data:
-            result = BasicInfo().fetch_interface()
-            res = {"success": True, "data": result}
+            result, total = BasicInfo().fetch_interface(page=page, page_size=page_size)
+            res = {"success": True, "data": result, 'total': total}
             self.out = json.dumps(res)
         else:
             res = {"success":False,"message":"Ok！"}

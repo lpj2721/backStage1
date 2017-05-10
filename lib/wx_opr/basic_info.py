@@ -23,12 +23,14 @@ class BasicInfo():
         except Exception:
             return traceback.format_exc()
 
-    def fetch_interface(self):
-        templates = self.db['interface_template'].find({})
+    def fetch_interface(self,page, page_size):
+        pages = (page - 1) * page_size
+        total = self.db['interface_template'].find({}).count()
+        templates = self.db['interface_template'].find({}).skip(pages).limit(page_size)
         result = []
         for template in templates:
             result.append(template)
-        return result
+        return result ,total
 
     def modify_interface(self,**kwargs):
         _id = kwargs.get('_id')

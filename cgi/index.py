@@ -60,7 +60,7 @@ def pre_do(c, fun, ext_type=None):
     token = g_session_redis.get('token')
     resp = make_response(out)
     resp.headers['access-token'] = token
-    resp.headers['x-total-count'] = 1
+    resp.headers['x-total-count'] = 6
     return resp
 
 
