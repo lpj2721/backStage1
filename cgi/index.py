@@ -7,6 +7,7 @@ import conf
 from db_conn.cont_redis import g_session_redis
 from login import Login
 from Interface import Interfaces
+from headerConfig import HeaderConfig
 
 app = Flask(__name__)
 app.debug = conf.debug_mode
@@ -66,12 +67,17 @@ def pre_do(c, fun, ext_type=None):
 
 @app.route(conf.url_pre + "login", methods = ['GET', 'POST', 'PATCH'])
 def login_func():
-    return pre_do(Login(),"login",ext_type="login")
+    return pre_do(Login(), "login", ext_type="login")
 
 
 @app.route(conf.url_pre + "interface", methods = ['GET', 'POST', 'PATCH'])
 def interface_func():
-    return pre_do(Interfaces(),"Interfaces")
+    return pre_do(Interfaces(), "Interfaces")
+
+
+@app.route(conf.url_pre + "headerConfig", methods = ['GET', 'POST', 'PATCH'])
+def header_config_func():
+    return pre_do(HeaderConfig(), "headerConfig")
 
 
 if __name__ == '__main__':

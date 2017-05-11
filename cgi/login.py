@@ -4,7 +4,7 @@
 import hashlib
 from conf import *
 import json
-from lib_util import randomStr
+from lib_util import random_str
 from db_conn.cont_redis import g_session_redis
 from wx_cgibase import cgibase
 from wx_opr.basic_info import BasicInfo
@@ -34,7 +34,7 @@ class Login(cgibase):
         user_name = data['username']
         result = BasicInfo().user_login(username=data['username'], password=data['password'])
         if result:
-            self.token = randomStr()
+            self.token = random_str()
             g_session_redis.set(g_redis_pix + self.token, user_name)
             g_session_redis.set(user_name, g_redis_pix + self.token)
             g_session_redis.set('token',g_redis_pix + self.token)

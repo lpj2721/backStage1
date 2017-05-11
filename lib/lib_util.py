@@ -2,14 +2,17 @@
 # -*- coding: utf-8 -*-
 
 import os
-RANDON_CHAR = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789'
-def randomStr(randomlength=128):
-    str = ''
-    chars = RANDON_CHAR
+import json
+RANDOM_CHAR = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789'
+
+
+def random_str(random_length=128):
+    sid_str = ''
+    chars = RANDOM_CHAR
     length = len(chars) - 1
-    for i in range(randomlength):
-        str += chars[ord(os.urandom(1)) % length]
-    return str
+    for i in range(random_length):
+        sid_str += chars[ord(os.urandom(1)) % length]
+    return sid_str
 
 
 def sort_dict(*kwargs):
@@ -20,5 +23,11 @@ def sort_dict(*kwargs):
     return kwargs
 
 
+def check_dict(kwargs):
+    try:
+        result_dict = json.loads(kwargs)
+        return True
+    except:
+        return None
 if __name__ == '__main__':
     pass

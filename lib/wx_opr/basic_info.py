@@ -17,11 +17,26 @@ class BasicInfo():
             return False
 
     def create_interface(self, **kwargs):
+        arg_rules = {
+            '_id': kwargs['_id'],
+            'parameter_rules': '',
+            'header_rules': ''
+        }
         try:
+            self.db['template_rules'].insert_one(arg_rules)
             self.db['interface_template'].insert_one(kwargs)
             return True
         except Exception:
             return traceback.format_exc()
+
+    def fatch_rules(self,page, page_size):
+        pages = (page - 1) * page_size
+        total = self.db['template_rules'].find({}).count()
+        templates = self.db['template_rules'].find({}).skip(pages).limit(page_size)
+        result = []
+        for template in templates:
+            result.append(template)
+        return result, total
 
     def fetch_interface(self,page, page_size):
         pages = (page - 1) * page_size
@@ -30,7 +45,7 @@ class BasicInfo():
         result = []
         for template in templates:
             result.append(template)
-        return result ,total
+        return result, total
 
     def modify_interface(self,**kwargs):
         _id = kwargs.get('_id')
@@ -38,6 +53,15 @@ class BasicInfo():
         print(kwargs)
         if _id:
             self.db['interface_template'].update_one({'_id': _id},{"$set": kwargs})
+            return True
+        else:
+            return False
+
+    def modify_rules(self,**kwargs):
+        _id = kwargs.get('_id')
+        del kwargs['_id']
+        if _id:
+            self.db['template_rules'].update_one({'_id': _id},{"$set": kwargs})
             return True
         else:
             return False

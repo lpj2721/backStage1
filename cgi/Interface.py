@@ -1,11 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import hashlib
-from conf import *
+
 import json
-from lib_util import randomStr
-from db_conn.cont_redis import g_session_redis
+from lib_util import check_dict
 from wx_cgibase import cgibase
 from wx_opr.basic_info import BasicInfo
 
@@ -64,6 +62,13 @@ class Interfaces(cgibase):
         '''{"opr":"login","data":{"username":"admin","password":"123456"}}'''
         self.log.debug("modify in.")
         data = self.input["input"]["data"].get('data')
+        parameter = data.get('request_parameter')
+        headers = data.get('Interface_header')
+        for check_parameter in [parameter, headers]:
+            if check_dict(check_parameter) is None:
+                res = {"success": False, "message": "输入有误！"}
+                self.out = json.dumps(res)
+                return self.out
         if data:
             result = BasicInfo().modify_interface(**data)
             if result:
@@ -80,7 +85,6 @@ class Interfaces(cgibase):
     def remove(self):
         self.log.debug("remove in.")
         data = self.input['input']['data'].get('id')
-        print(data)
         if data:
             BasicInfo().remove_interface(data)
             res = {"success": True, "message": "Ok！"}
