@@ -2,21 +2,19 @@
 # encoding: utf-8
 """
 @author: WL
-@time: 2017/5/11 16:15
+@time: 2017/5/15 9:18
 """
-
 import json
 from lib_util import check_dict
 from wx_cgibase import cgibase
 from wx_opr.basic_info import BasicInfo
 
 
-class HeaderConfig(cgibase):
+class Interfaces(cgibase):
     def __init__(self):
         self.oprList = {
             "fetch": self.fetch,
-            "modify": self.modify,
-            "post": self.post,
+            "search": self.search,
         }
         return cgibase.__init__(self)
 
@@ -37,7 +35,7 @@ class HeaderConfig(cgibase):
         page = int(data['page'])
         page_size = data['PAGE_SIZE']
         if data:
-            result, total = BasicInfo().fatch_rules(page=page, page_size=page_size)
+            result, total = BasicInfo().fetch_interface(page=page, page_size=page_size)
             res = {"success": True, "data": result, 'total': total}
             self.out = json.dumps(res)
         else:
@@ -45,32 +43,20 @@ class HeaderConfig(cgibase):
             self.out = json.dumps(res)
         return self.out
 
-    def modify(self):
+    def search(self):
 
         '''{"opr":"login","data":{"username":"admin","password":"123456"}}'''
-        self.log.debug("modify in.")
-        data = self.input["input"]["data"].get('data')
+        self.log.debug("search in.")
+        data = self.input["input"]["data"]
         if data:
-            result = BasicInfo().modify_rules(**data)
-            if result:
-                res = {"success": True, "message": "Ok！"}
-                self.out = json.dumps(res)
-            else:
-                res = {"success":False,"message":"更新失败！"}
-                self.out = json.dumps(res)
+            BasicInfo().create_interface(**data)
+            res = {"success": True, "message": "Ok！"}
+            self.out = json.dumps(res)
         else:
-            res = {"success": False, "message": "输入有误！"}
+            res = {"success":False,"message":"Ok！"}
             self.out = json.dumps(res)
         return self.out
 
-    def post(self):
-        self.log.debug("post in.")
-        data = self.input["input"]["data"].get('id')
-        if data:
-            result = BasicInfo().interface_post(data)
-            res = {"success": True, "data": result}
-            self.out = json.dumps(res)
-        return self.out
 
 if __name__ == "__main__":
     pass

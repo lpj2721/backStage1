@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 from db_conn.cont_mongo import MongoConn
+from db_conn.cont_redis import g_session_redis
+from util_func import rules_analysis
 import time
 import traceback
+import random
+import json
 import copy
 
 
@@ -68,6 +72,50 @@ class BasicInfo():
 
     def remove_interface(self,_id):
         self.db['interface_template'].delete_one({'_id':_id})
+
+    def interface_post(self, _id):
+        interface_template = self.db['interface_template'].find_one(_id)
+        request_parameter = json.loads(interface_template['request_parameter'])
+        serial_num = ("%.6f" % time.time()).replace(".", "") + str(random.randint(100, 999))
+        template_rules = self.db['template_rules'].find_one(_id)
+        rules = eval(template_rules['parameter_rules'])
+        rules_name, rules_arg = rules_analysis(*rules)
+        copy_parameter = copy.deepcopy(request_parameter)
+        if rules_name == list(request_parameter.keys()):
+            data = ()
+            for each in rules_arg.values():
+                a = tuple(each)
+                data += (a,)
+            lengths = []  # 数据各个子数组的长度
+            totalLength = 1
+            for row in data:
+                length = len(row)
+                lengths.append(length)
+                totalLength *= length
+                pass
+            for i in range(totalLength):
+                j = 0
+                result = ()
+                for lens in lengths:
+                    result += (data[j][i % lens],)
+                    i = int(i / lens)
+                    j += 1
+                    pass
+                k = 0
+                for name in rules_name:
+                    copy_parameter[name] = result[k]
+                    k += 1
+                data_source = {
+                    "serial_num": serial_num,
+                    "test_name": _id,
+                    "Interface_header": interface_template['Interface_header'],
+                    "request_parameter": copy_parameter,
+                    "response": "",
+                    "status-code": 0
+                }
+                self.db['data_source'].insert_one(data_source)
+            g_session_redis.lpush('test_queue',serial_num)
+            return serial_num
 
     def get_dishInfo(self, store_id):
         dishInfo = self.db['business_info'].find_one(store_id, {'_id': 0, 'dishes': 1, 'dish': 1})
