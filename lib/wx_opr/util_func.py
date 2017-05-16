@@ -5,31 +5,20 @@
 @time: 2017/5/15 14:58
 """
 import copy
-
-def rules_analysis(*args):
-    rules_name = []
-    rules_arg = {}
-    for each in args:
-        rules_name.append(each['arg_name'])
-        rules_arg[each['arg_name']] = each['arg_rules']
-    return rules_name, rules_arg
+import json
+from lib_post import post
+from db_conn.cont_mongo import MongoConn
+from wx_opr.basic_info import BasicInfo
 
 
-def list_combination(args=(0,)):
-    lengths = []  # 数据各个子数组的长度
-    totalLength = 1
-    for row in args:
-        length = len(row)
-        lengths.append(length)
-        totalLength *= length
-        pass
-    result = (0,)
-    for i in range(totalLength):
-        j = 0
-        for len in lengths:
-            result = result + (args[j][i % len],)
-            i = int(i / len)
-            j += 1
-            pass
-        pass
-    return result
+def post_work(serial_num):
+    test_cache = BasicInfo().search_outcome(serial_num)
+    for each in test_cache:
+        header = each['Interface_header']
+        body = json.dumps(each['request_parameter'])
+        url = each['Interface_address']
+        resp_status, resp_body = post(url=url, datas=body, headers=header)
+        each['status-code'] = resp_status
+        each['response'] = resp_body
+        MongoConn().db['data_source'].update_one({'_id': each['_id']}, {"$set": each})
+    return True

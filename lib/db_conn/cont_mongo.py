@@ -6,7 +6,7 @@ Created on 2016-12-02 9:44
 """
 import pymongo
 import sys
-from db_conf import MONGODB_CONFIG
+from db_conn.db_conf import MONGODB_CONFIG
 
 
 class MongoConn():

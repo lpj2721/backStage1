@@ -3,14 +3,27 @@
 
 from flask import Flask, request, make_response, redirect
 import json
+import threading,time
 import conf
 from db_conn.cont_redis import g_session_redis
 from login import Login
 from Interface import Interfaces
 from headerConfig import HeaderConfig
+from outcome import Outcome
+from wx_opr.util_func import post_work
 
 app = Flask(__name__)
 app.debug = conf.debug_mode
+
+def background_thread():
+    """处理redis队列"""
+    while True:
+        time.sleep(2)
+        new_msg = g_session_redis.lpop("test_queue")
+        if new_msg:
+            print(new_msg)
+            a = post_work(new_msg.decode())
+            print(a)
 
 
 def pre_do(c, fun, ext_type=None):
@@ -80,5 +93,13 @@ def header_config_func():
     return pre_do(HeaderConfig(), "headerConfig")
 
 
+@app.route(conf.url_pre + "outcome", methods = ['GET', 'POST', 'PATCH'])
+def outcome_func():
+    return pre_do(Outcome(), "outcome")
+
+
 if __name__ == '__main__':
+    from threading import Thread
+    t = Thread(target=background_thread,  daemon=True)
+    t.start()
     app.run(host="0.0.0.0", port=5000)

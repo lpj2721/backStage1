@@ -10,7 +10,7 @@ from wx_cgibase import cgibase
 from wx_opr.basic_info import BasicInfo
 
 
-class Interfaces(cgibase):
+class Outcome(cgibase):
     def __init__(self):
         self.oprList = {
             "fetch": self.fetch,
@@ -35,7 +35,7 @@ class Interfaces(cgibase):
         page = int(data['page'])
         page_size = data['PAGE_SIZE']
         if data:
-            result, total = BasicInfo().fetch_interface(page=page, page_size=page_size)
+            result, total = BasicInfo().fetch_outcome(page=page, page_size=page_size)
             res = {"success": True, "data": result, 'total': total}
             self.out = json.dumps(res)
         else:

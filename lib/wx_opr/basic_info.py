@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from db_conn.cont_mongo import MongoConn
 from db_conn.cont_redis import g_session_redis
-from util_func import rules_analysis
 import time
 import traceback
 import random
@@ -9,7 +8,7 @@ import json
 import copy
 
 
-class BasicInfo():
+class BasicInfo:
     def __init__(self):
         self.db = MongoConn().db
 
@@ -32,6 +31,15 @@ class BasicInfo():
             return True
         except Exception:
             return traceback.format_exc()
+    @staticmethod
+    def rules_analysis(*args):
+        rules_name = []
+        rules_arg = {}
+        for each in args:
+            print(each)
+            rules_name.append(each['arg_name'])
+            rules_arg[each['arg_name']] = each['arg_rules']
+        return rules_name, rules_arg
 
     def fatch_rules(self,page, page_size):
         pages = (page - 1) * page_size
@@ -50,6 +58,25 @@ class BasicInfo():
         for template in templates:
             result.append(template)
         return result, total
+
+    def fetch_outcome(self,page, page_size):
+        pages = (page - 1) * page_size
+        total = self.db['data_source'].find({}).count()
+        templates = self.db['data_source'].find({},{'_id': 0}).skip(pages).limit(page_size)
+        result = []
+        for template in templates:
+            template['request_parameter'] = json.dumps(template['request_parameter'])
+            if template['response'] == '':
+                template['response'] = "测试正在进行，请耐心等待结果"
+            result.append(template)
+        return result, total
+
+    def search_outcome(self,serial_num):
+        templates = self.db['data_source'].find({'serial_num': serial_num})
+        result = []
+        for template in templates:
+            result.append(template)
+        return result
 
     def modify_interface(self,**kwargs):
         _id = kwargs.get('_id')
@@ -79,7 +106,7 @@ class BasicInfo():
         serial_num = ("%.6f" % time.time()).replace(".", "") + str(random.randint(100, 999))
         template_rules = self.db['template_rules'].find_one(_id)
         rules = eval(template_rules['parameter_rules'])
-        rules_name, rules_arg = rules_analysis(*rules)
+        rules_name, rules_arg = self.rules_analysis(*rules)
         copy_parameter = copy.deepcopy(request_parameter)
         if rules_name == list(request_parameter.keys()):
             data = ()
@@ -108,6 +135,7 @@ class BasicInfo():
                 data_source = {
                     "serial_num": serial_num,
                     "test_name": _id,
+                    "Interface_address": interface_template['Interface_address'],
                     "Interface_header": interface_template['Interface_header'],
                     "request_parameter": copy_parameter,
                     "response": "",
